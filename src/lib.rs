@@ -77,7 +77,7 @@ fn signal_fts5_tokenize_internal(
 fn web_preprocess(input: &mut String, regex: &Regex) {
     let temp = input.clone();
     input.clear();
-    input.push_str(regex.replace(&temp, "$2$5 $3$6").to_string().as_str());
+    input.push_str(regex.replace_all(&temp, "$2$5 $3$6").to_string().as_str());
 }
 
 fn is_diacritic(x: char) -> bool {
