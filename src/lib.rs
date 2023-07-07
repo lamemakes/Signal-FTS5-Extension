@@ -13,6 +13,8 @@ pub use crate::common::*;
 use libc::{c_char, c_int, c_uchar, c_void};
 use unicode_normalization::UnicodeNormalization;
 use unicode_segmentation::UnicodeSegmentation;
+use lazy_static::lazy_static;
+use regex::Regex;
 
 #[no_mangle]
 pub extern "C" fn signal_fts5_tokenize(
@@ -42,7 +44,15 @@ fn signal_fts5_tokenize_internal(
 
     // Map errors to SQLITE_OK because failing here means that the database
     // wouldn't accessible.
-    let input = core::str::from_utf8(slice).map_err(|_| SQLITE_OK)?;
+    let mut input = String::from(core::str::from_utf8(slice).map_err(|_| SQLITE_OK)?);
+
+    lazy_static! {
+        static ref RE: Regex = Regex::new(r"((https?:\/\/[a-zA-Z0-9]*)\.([a-zA-Z0-9]))|((www)\.([a-zA-Z0-9]))").expect("Faied to create RegEx");
+    }
+
+    if RE.is_match(&input) {
+        web_preprocess(&mut input, &RE)
+    }
 
     let mut normalized = String::with_capacity(1024);
 
@@ -62,6 +72,12 @@ fn signal_fts5_tokenize_internal(
     }
 
     return Ok(());
+}
+
+fn web_preprocess(input: &mut String, regex: &Regex) {
+    let temp = input.clone();
+    input.clear();
+    input.push_str(regex.replace(&temp, "$2$5 $3$6").to_string().as_str());
 }
 
 fn is_diacritic(x: char) -> bool {
