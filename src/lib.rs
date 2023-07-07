@@ -47,7 +47,7 @@ fn signal_fts5_tokenize_internal(
     let mut input = String::from(core::str::from_utf8(slice).map_err(|_| SQLITE_OK)?);
 
     lazy_static! {
-        static ref RE: Regex = Regex::new(r"((https?:\/\/[a-zA-Z0-9]*)\.([a-zA-Z0-9]))|((www)\.([a-zA-Z0-9]))").expect("Faied to create RegEx");
+        static ref RE: Regex = Regex::new(r"((https?:\/\/[a-zA-Z0-9]*)\.([a-zA-Z0-9]*\.))|((www)\.([a-zA-Z0-9]))").expect("Faied to create RegEx");
     }
 
     if RE.is_match(&input) {
